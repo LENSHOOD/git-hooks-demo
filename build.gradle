@@ -8,6 +8,10 @@ version '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
 
+checkstyle {
+    toolVersion = '8.21'
+}
+
 repositories {
     mavenCentral()
 }
@@ -18,4 +22,5 @@ dependencies {
 
 task installGitHooks() {
     "git config core.hooksPath ./git-hooks".execute()
+    "chmod -R 741 ./git-hooks"
 }
