@@ -1,0 +1,11 @@
+#!/bin/bash
+
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+SHA1=$3
+
+./gradlew checkCommitMsgByConventionalCommit -PcommitMsg=$COMMIT_SOURCE
+
+RESULT=$?
+
+exit $RESULT

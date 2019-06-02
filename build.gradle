@@ -1,7 +1,5 @@
-plugins {
-    id 'java'
-    id 'checkstyle'
-}
+apply plugin: 'java'
+apply plugin: 'checkstyle'
 
 group 'zxh-demo'
 version '1.0-SNAPSHOT'
@@ -10,6 +8,60 @@ sourceCompatibility = 1.8
 
 checkstyle {
     toolVersion = '8.21'
+}
+
+tasks.withType(Checkstyle).each { checkstyleTask ->
+    checkstyleTask.doLast {
+        reports.all { report ->
+            def outputFile = report.destination
+            if (outputFile.exists() && outputFile.text.contains("<error ")) {
+                throw new GradleException("There were checkstyle warnings! For more info check $outputFile")
+            }
+        }
+    }
+}
+
+task checkCommitMsgByConventionalCommit() {
+    String[] types = ["feat", "fix", "docs", "style", "refactor",
+            "test", "chore", "build", "ci", "perf"]
+
+    if (!project.hasProperty("commitMsg")) {
+        return
+    }
+
+    String[] msgArray = ((String)commitMsg).split('\n\n')
+    if (msgArray.length > 3) {
+        throw new GradleException("[COMMIT MESSAGE CHECKER] \n" +
+                "Too many message sections! (Header, Detail, Footer allowed)" +
+                "\nAbout conventional commit, see: https://www.conventionalcommits.org")
+    }
+
+    String header = msgArray[0]
+    String[] headers = header.split(": ")
+    if (headers.length != 2) {
+        throw new GradleException("[COMMIT MESSAGE CHECKER] \n" +
+                "Wrong header format, which should be: [{type}({scope}): {description}]" +
+                "\nAbout conventional commit, see: https://www.conventionalcommits.org")
+    }
+
+    for (int i=0; i<types.length; i++) {
+        if (headers[0].startsWith(types[i])) {
+            break
+        }
+
+        if (i == types.length - 1) {
+            throw new GradleException("[COMMIT MESSAGE CHECKER] \n"
+                    + "Wrong type detected! "
+                    + "Allowed: feat, fix, docs, style, refactor, test, chore, build, ci, perf."
+                    + "\nAbout conventional commit, see: https://www.conventionalcommits.org")
+        }
+    }
+
+    if (header.length() > 72) {
+        throw new GradleException("[COMMIT MESSAGE CHECKER] \n" 
+                + "Too long header! Header length should be shorter than 72 characters."
+                + "\nAbout conventional commit, see: https://www.conventionalcommits.org")
+    }
 }
 
 repositories {
