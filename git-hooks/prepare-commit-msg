@@ -4,8 +4,8 @@ COMMIT_MSG_FILE=$1
 COMMIT_SOURCE=$2
 SHA1=$3
 
-./gradlew checkCommitMsgByConventionalCommit -PcommitMsg=$COMMIT_SOURCE
+MSG=$(cat $COMMIT_MSG_FILE)
+./gradlew checkCommitMsgByConventionalCommit -PcommitMsg="$MSG"
 
 RESULT=$?
-
 exit $RESULT
