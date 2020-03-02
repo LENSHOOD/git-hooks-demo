@@ -21,63 +21,21 @@ tasks.withType(Checkstyle).each { checkstyleTask ->
     }
 }
 
-task checkCommitMsgByConventionalCommit() {
-    String[] types = ["feat", "fix", "docs", "style", "refactor",
-            "test", "chore", "build", "ci", "perf"]
-
-    // if no params then directly return
-    if (!project.hasProperty("commitMsg")) {
-        return
-    }
-
-    // check the three section: header, detail, footer
-    String[] msgArray = ((String)commitMsg).split('\n\n')
-    if (msgArray.length > 3) {
-        throw new GradleException("[COMMIT MESSAGE CHECKER] \n" +
-                "Too many message sections! (Header, Detail, Footer allowed)" +
-                "\nAbout conventional commit, see: https://www.conventionalcommits.org")
-    }
-
-    // check header format
-    String header = msgArray[0]
-    String[] headers = header.split(": ")
-    if (headers.length != 2) {
-        throw new GradleException("[COMMIT MESSAGE CHECKER] \n" +
-                "Wrong header format, which should be: {type}({scope}): {description}" +
-                "\nAbout conventional commit, see: https://www.conventionalcommits.org")
-    }
-
-    // check type
-    for (int i=0; i<types.length; i++) {
-        if (headers[0].startsWith(types[i])) {
-            break
-        }
-
-        if (i == types.length - 1) {
-            throw new GradleException("[COMMIT MESSAGE CHECKER] \n"
-                    + "Wrong type detected! "
-                    + "Allowed: feat, fix, docs, style, refactor, test, chore, build, ci, perf."
-                    + "\nAbout conventional commit, see: https://www.conventionalcommits.org")
-        }
-    }
-
-    // check header length
-    if (header.length() > 72) {
-        throw new GradleException("[COMMIT MESSAGE CHECKER] \n" 
-                + "Too long header! Header length should be shorter than 72 characters."
-                + "\nAbout conventional commit, see: https://www.conventionalcommits.org")
-    }
-}
-
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.6.0'
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.6.0'
+    testCompile group: 'org.hamcrest', name: 'hamcrest-library', version: '2.2'
 }
 
 task installGitHooks() {
     "git config core.hooksPath ./git-hooks".execute()
     "chmod -R 741 ./git-hooks"
+}
+
+test {
+    useJUnitPlatform()
 }
